@@ -494,6 +494,7 @@ install(FILES "${version_config}" DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Vulk
 # https://gitlab.kitware.com/cmake/cmake/-/issues/22621
 find_package(PkgConfig)
 if (PKG_CONFIG_FOUND)
+    set(PRIVATE_LIBS "")
     if(WIN32)
         if(MINGW)
             set(VULKAN_LIB_SUFFIX "-1.dll")
