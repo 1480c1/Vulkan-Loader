@@ -7,4 +7,5 @@ Name: Vulkan-Loader
 Description: Vulkan Loader
 Version: @VULKAN_LOADER_VERSION@
 Libs: -L${libdir} -lvulkan@VULKAN_LIB_SUFFIX@
+@PRIVATE_LIBS@
 Cflags: -I${includedir}
