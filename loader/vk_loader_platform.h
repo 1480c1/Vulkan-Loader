@@ -242,6 +242,20 @@ static inline void loader_platform_thread_once_fn(pthread_once_t *ctl, void (*fu
 #define LOADER_PLATFORM_THREAD_ONCE_DECLARATION(var) pthread_once_t var = PTHREAD_ONCE_INIT;
 #define LOADER_PLATFORM_THREAD_ONCE_EXTERN_DEFINITION(var) extern pthread_once_t var;
 #define LOADER_PLATFORM_THREAD_ONCE(ctl, func) loader_platform_thread_once_fn(ctl, func);
+#elif defined(_WIN32) && defined(BUILD_STATIC_LOADER)
+static BOOL CALLBACK InitFuncWrapper(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *Context) {
+    void (*func)(void) = (void (*)(void))Parameter;
+    func();
+    return TRUE;
+}
+static void loader_platform_thread_once_fn(void *ctl, void (*func)(void)) {
+    assert(func != NULL);
+    assert(ctl != NULL);
+    InitOnceExecuteOnce((PINIT_ONCE)ctl, InitFuncWrapper, (void *)func, NULL);
+}
+#define LOADER_PLATFORM_THREAD_ONCE_DECLARATION(var) INIT_ONCE var = INIT_ONCE_STATIC_INIT;
+#define LOADER_PLATFORM_THREAD_ONCE_EXTERN_DEFINITION(var) extern INIT_ONCE var;
+#define LOADER_PLATFORM_THREAD_ONCE(ctl, func) loader_platform_thread_once_fn(ctl, func)
 #else
 #define LOADER_PLATFORM_THREAD_ONCE_DECLARATION(var)
 #define LOADER_PLATFORM_THREAD_ONCE_EXTERN_DEFINITION(var)

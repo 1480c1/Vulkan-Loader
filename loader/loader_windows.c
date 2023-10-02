@@ -97,6 +97,7 @@ void windows_initialization(void) {
 #endif
 }
 
+#if !defined(BUILD_STATIC_LOADER)
 BOOL WINAPI DllMain(HINSTANCE hinst, DWORD reason, LPVOID reserved) {
     (void)hinst;
     switch (reason) {
@@ -114,6 +115,7 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD reason, LPVOID reserved) {
     }
     return TRUE;
 }
+#endif
 
 bool windows_add_json_entry(const struct loader_instance *inst,
                             char **reg_data,    // list of JSON files
