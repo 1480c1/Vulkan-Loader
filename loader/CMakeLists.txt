@@ -343,14 +343,16 @@ if(WIN32)
     # when adding the suffix the import and runtime library names must be consistent
     # mingw: libvulkan-1.dll.a / vulkan-1.dll
     # msvc: vulkan-1.lib / vulkan-1.dll
-    set_target_properties(vulkan
-                          PROPERTIES
-                          OUTPUT_NAME ${API_TYPE}-1)
-    if(MINGW)
-        # generate the same DLL with mingw
+    if (NOT BUILD_STATIC_LOADER)
         set_target_properties(vulkan
                               PROPERTIES
-                              PREFIX "")
+                              OUTPUT_NAME ${API_TYPE}-1)
+        if(MINGW)
+            # generate the same DLL with mingw
+            set_target_properties(vulkan
+                                  PROPERTIES
+                                  PREFIX "")
+        endif()
     endif()
 
     if(MSVC AND ENABLE_WIN10_ONECORE)
@@ -511,7 +513,7 @@ if (PKG_CONFIG_FOUND)
         set(PRIVATE_LIBS "Libs.private: ${PRIVATE_LIBS}")
     endif()
 
-    if(WIN32)
+    if(WIN32 AND NOT BUILD_STATIC_LOADER)
         if(MINGW)
             set(VULKAN_LIB_SUFFIX "-1.dll")
         else()
