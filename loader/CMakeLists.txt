@@ -214,7 +214,7 @@ end
 
     if(ASM_COMPILER_WORKS)
         add_executable(asm_offset asm_offset.c)
-        target_link_libraries(asm_offset PRIVATE loader_specific_options)
+        target_link_libraries(asm_offset PRIVATE $<BUILD_INTERFACE:loader_specific_options>)
         # If am emulator is provided (Like Wine), or running on native, run asm_offset to generate gen_defines.asm
         if (CMAKE_CROSSCOMPILING_EMULATOR OR NOT CMAKE_CROSSCOMPILING)
             add_custom_command(OUTPUT gen_defines.asm DEPENDS asm_offset COMMAND asm_offset ${LOADER_ASM_DIALECT})
@@ -309,7 +309,7 @@ elseif(UNIX OR MINGW OR (WIN32 AND USE_GAS)) # i.e.: Linux & Apple & MinGW & Win
 
     if(ASSEMBLER_WORKS)
         add_executable(asm_offset asm_offset.c)
-        target_link_libraries(asm_offset loader_specific_options)
+        target_link_libraries(asm_offset PRIVATE $<BUILD_INTERFACE:loader_specific_options>)
         # If not cross compiling, run asm_offset to generage gen_defines.asm
         if (NOT CMAKE_CROSSCOMPILING)
             add_custom_command(OUTPUT gen_defines.asm DEPENDS asm_offset COMMAND asm_offset GAS)
@@ -372,13 +372,19 @@ if(WIN32)
         set(RC_FILE_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/loader.rc)
     endif()
 
+    if (BUILD_STATIC_LOADER)
+        set(VULKAN_LIBRARY_TYPE STATIC)
+    else()
+        set(VULKAN_LIBRARY_TYPE SHARED)
+    endif()
+
     add_library(vulkan
-                SHARED
+                ${VULKAN_LIBRARY_TYPE}
                 ${NORMAL_LOADER_SRCS}
                 ${CMAKE_CURRENT_SOURCE_DIR}/${API_TYPE}-1.def
                 ${RC_FILE_LOCATION})
 
-    target_link_libraries(vulkan PRIVATE loader_specific_options)
+    target_link_libraries(vulkan PRIVATE $<BUILD_INTERFACE:loader_specific_options>)
 
     # when adding the suffix the import and runtime library names must be consistent
     # mingw: libvulkan-1.dll.a / vulkan-1.dll
@@ -458,7 +464,7 @@ else()
         endif()
 
         target_link_libraries(vulkan-framework ${CMAKE_DL_LIBS} Threads::Threads -lm "-framework CoreFoundation")
-        target_link_libraries(vulkan-framework loader_specific_options)
+        target_link_libraries(vulkan-framework $<BUILD_INTERFACE:loader_specific_options>)
 
         if (MODIFY_UNKNOWN_FUNCTION_DECLS)
             # Modifies the names of functions as they appearin the assembly code so that the
@@ -505,7 +511,7 @@ if (LOADER_USE_UNSAFE_FILE_SEARCH)
 endif()
 
 # common attributes of the vulkan library
-target_link_libraries(vulkan PRIVATE loader_specific_options)
+target_link_libraries(vulkan PRIVATE $<BUILD_INTERFACE:loader_specific_options>)
 
 target_link_libraries(vulkan PRIVATE Vulkan::Headers)
 add_library(Vulkan::Loader ALIAS vulkan)
