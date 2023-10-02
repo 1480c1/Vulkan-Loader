@@ -499,6 +499,18 @@ install(FILES "${version_config}" DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Vulk
 find_package(PkgConfig)
 if (PKG_CONFIG_FOUND)
     set(PRIVATE_LIBS "")
+    get_target_property(vulkan_privates vulkan LINK_LIBRARIES) # get the list of private libraries
+    foreach(LIB IN LISTS vulkan_privates)
+        if (NOT LIB MATCHES "<" AND NOT LIB MATCHES "::") # Don't include generator expressions and targets
+            list(APPEND PRIVATE_LIBS "-l${LIB}")
+        endif()
+    endforeach()
+    list(REMOVE_DUPLICATES PRIVATE_LIBS)
+    string(REPLACE ";" " " PRIVATE_LIBS "${PRIVATE_LIBS}")
+    if(PRIVATE_LIBS)
+        set(PRIVATE_LIBS "Libs.private: ${PRIVATE_LIBS}")
+    endif()
+
     if(WIN32)
         if(MINGW)
             set(VULKAN_LIB_SUFFIX "-1.dll")
